@@ -124,6 +124,11 @@ func (c *Command) Run(input concourse.OutRequest) (concourse.OutResponse, error)
 			if err != nil {
 				return concourse.OutResponse{}, err
 			}
+		} else {
+			_, err = c.flyCommand.PausePipeline(p.Name)
+			if err != nil {
+				return concourse.OutResponse{}, err
+			}
 		}
 	}
 	c.logger.Debugf("Setting pipelines complete\n")
