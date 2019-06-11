@@ -87,12 +87,12 @@ func (c *Command) Run(input concourse.OutRequest) (concourse.OutResponse, error)
 
 		if !present {
 			c.logger.Debugf("Destroying pipeline: %v\n", p.Name)
-
 			_, err = c.flyCommand.DestroyPipeline(p.Name)
 			if err != nil {
 				return concourse.OutResponse{}, err
 			}
 
+			fmt.Fprintf(os.Stderr, "pipeline '%s' destroyed\n", p.Name)
 			continue
 		}
 
@@ -107,7 +107,7 @@ func (c *Command) Run(input concourse.OutRequest) (concourse.OutResponse, error)
 		var setOutput []byte
 		setOutput, err = c.flyCommand.SetPipeline(p.Name, configFilepath, varsFilepaths, p.Vars)
 		c.logger.Debugf("pipeline '%s' set; output:\n\n%s\n", p.Name, string(setOutput))
-		fmt.Fprintf(os.Stderr, "pipeline '%s' set; output:\n\n%s\n", p.Name, string(setOutput))
+		fmt.Fprintf(os.Stderr, "pipeline '%s' set\n", p.Name)
 		if err != nil {
 			return concourse.OutResponse{}, err
 		}
