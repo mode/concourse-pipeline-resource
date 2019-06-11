@@ -77,6 +77,25 @@ func (c *Command) Run(input concourse.OutRequest) (concourse.OutResponse, error)
 
 		c.logger.Debugf("Login successful\n")
 
+		present := true
+		if p.Present != "" {
+			present, err = strconv.ParseBool(p.Present)
+			if err != nil {
+				return concourse.OutResponse{}, err
+			}
+		}
+
+		if !present {
+			c.logger.Debugf("Destroying pipeline: %v\n", p.Name)
+
+			_, err = c.flyCommand.DestroyPipeline(p.Name)
+			if err != nil {
+				return concourse.OutResponse{}, err
+			}
+
+			continue
+		}
+
 		configFilepath := filepath.Join(c.sourcesDir, p.ConfigFile)
 
 		var varsFilepaths []string

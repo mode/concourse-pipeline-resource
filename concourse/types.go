@@ -58,6 +58,7 @@ type Pipeline struct {
 	TeamName   string                 `json:"team" yaml:"team"`
 	Unpaused   bool                   `json:"unpaused" yaml:"unpaused"`
 	Exposed    bool                   `json:"exposed" yaml:"exposed"`
+	Present    string                 `json:"present" yaml:"present"`
 }
 
 type OutResponse struct {
