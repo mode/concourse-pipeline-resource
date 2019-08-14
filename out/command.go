@@ -77,6 +77,25 @@ func (c *Command) Run(input concourse.OutRequest) (concourse.OutResponse, error)
 
 		c.logger.Debugf("Login successful\n")
 
+		present := true
+		if p.Present != "" {
+			present, err = strconv.ParseBool(p.Present)
+			if err != nil {
+				return concourse.OutResponse{}, err
+			}
+		}
+
+		if !present {
+			c.logger.Debugf("Destroying pipeline: %v\n", p.Name)
+			_, err = c.flyCommand.DestroyPipeline(p.Name)
+			if err != nil {
+				return concourse.OutResponse{}, err
+			}
+
+			fmt.Fprintf(os.Stderr, "pipeline '%s' destroyed\n", p.Name)
+			continue
+		}
+
 		configFilepath := filepath.Join(c.sourcesDir, p.ConfigFile)
 
 		var varsFilepaths []string
@@ -88,7 +107,7 @@ func (c *Command) Run(input concourse.OutRequest) (concourse.OutResponse, error)
 		var setOutput []byte
 		setOutput, err = c.flyCommand.SetPipeline(p.Name, configFilepath, varsFilepaths, p.Vars)
 		c.logger.Debugf("pipeline '%s' set; output:\n\n%s\n", p.Name, string(setOutput))
-		fmt.Fprintf(os.Stderr, "pipeline '%s' set; output:\n\n%s\n", p.Name, string(setOutput))
+		fmt.Fprintf(os.Stderr, "pipeline '%s' set\n", p.Name)
 		if err != nil {
 			return concourse.OutResponse{}, err
 		}
@@ -102,6 +121,11 @@ func (c *Command) Run(input concourse.OutRequest) (concourse.OutResponse, error)
 
 		if p.Unpaused {
 			_, err = c.flyCommand.UnpausePipeline(p.Name)
+			if err != nil {
+				return concourse.OutResponse{}, err
+			}
+		} else {
+			_, err = c.flyCommand.PausePipeline(p.Name)
 			if err != nil {
 				return concourse.OutResponse{}, err
 			}
