@@ -105,6 +105,19 @@ type FakeCommand struct {
 		result1 []byte
 		result2 error
 	}
+	PausePipelineStub        func(string) ([]byte, error)
+	pausePipelineMutex       sync.RWMutex
+	pausePipelineArgsForCall []struct {
+		arg1 string
+	}
+	pausePipelineReturns struct {
+		result1 []byte
+		result2 error
+	}
+	pausePipelineReturnsOnCall map[int]struct {
+		result1 []byte
+		result2 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -486,6 +499,69 @@ func (fake *FakeCommand) SetPipelineReturnsOnCall(i int, result1 []byte, result2
 		})
 	}
 	fake.setPipelineReturnsOnCall[i] = struct {
+		result1 []byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeCommand) PausePipeline(arg1 string) ([]byte, error) {
+	fake.pausePipelineMutex.Lock()
+	ret, specificReturn := fake.pausePipelineReturnsOnCall[len(fake.pausePipelineArgsForCall)]
+	fake.pausePipelineArgsForCall = append(fake.pausePipelineArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("PausePipeline", []interface{}{arg1})
+	fake.pausePipelineMutex.Unlock()
+	if fake.PausePipelineStub != nil {
+		return fake.PausePipelineStub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.pausePipelineReturns
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeCommand) PausePipelineCallCount() int {
+	fake.pausePipelineMutex.RLock()
+	defer fake.pausePipelineMutex.RUnlock()
+	return len(fake.pausePipelineArgsForCall)
+}
+
+func (fake *FakeCommand) PausePipelineCalls(stub func(string) ([]byte, error)) {
+	fake.pausePipelineMutex.Lock()
+	defer fake.pausePipelineMutex.Unlock()
+	fake.PausePipelineStub = stub
+}
+
+func (fake *FakeCommand) PausePipelineArgsForCall(i int) string {
+	fake.pausePipelineMutex.RLock()
+	defer fake.pausePipelineMutex.RUnlock()
+	argsForCall := fake.pausePipelineArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeCommand) PausePipelineReturns(result1 []byte, result2 error) {
+	fake.pausePipelineMutex.Lock()
+	defer fake.pausePipelineMutex.Unlock()
+	fake.PausePipelineStub = nil
+	fake.pausePipelineReturns = struct {
+		result1 []byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeCommand) PausePipelineReturnsOnCall(i int, result1 []byte, result2 error) {
+	fake.pausePipelineMutex.Lock()
+	defer fake.pausePipelineMutex.Unlock()
+	fake.PausePipelineStub = nil
+	if fake.pausePipelineReturnsOnCall == nil {
+		fake.pausePipelineReturnsOnCall = make(map[int]struct {
+			result1 []byte
+			result2 error
+		})
+	}
+	fake.pausePipelineReturnsOnCall[i] = struct {
 		result1 []byte
 		result2 error
 	}{result1, result2}
